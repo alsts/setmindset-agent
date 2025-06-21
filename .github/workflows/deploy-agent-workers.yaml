@@ -1,0 +1,47 @@
+name: Deploy Agent
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    strategy:
+      matrix:
+        include:
+          - name: "setmindset-agent"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.10.0
+          run_install: false
+      - name: Install dependencies
+        run: pnpm install
+      - name: Build
+        run: pnpm build
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3.14.1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: pnpm
+          wranglerVersion: "4.6.0"
+          command: deploy --config .mastra/output/wrangler.json --name ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}-setmindset-agent
+          quiet: true
+          secrets: |
+            CLOUDFLARE_ACCOUNT_ID
+            CLOUDFLARE_PROJECT_NAME
+            CLOUDFLARE_API_TOKEN
+            OPENAI_API_KEY
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PROJECT_NAME: setmindset-agent
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
