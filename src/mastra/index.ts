@@ -5,14 +5,21 @@ import { LibSQLStore } from '@mastra/libsql';
 import { weatherWorkflow } from './workflows/weather-workflow';
 import { weatherAgent } from './agents/weather-agent';
 import { CloudflareDeployer } from '@mastra/deployer-cloudflare';
+import { PostgresStore } from '@mastra/pg';
+
+const storage = new PostgresStore({
+  connectionString: process.env.DATABASE_URL!,
+});
+
+const devStorage = new LibSQLStore({
+  url: "file:../mastra.db",
+});
+
 
 export const mastra = new Mastra({
   workflows: { weatherWorkflow },
   agents: { weatherAgent },
-  storage: new LibSQLStore({
-    // stores telemetry, evals, ... into memory storage, if it needs to persist, change to file:../mastra.db
-    url: ":memory:",
-  }),
+  storage: storage,
   deployer: new CloudflareDeployer({
     scope: process.env.CLOUDFLARE_ACCOUNT_ID || "",
     projectName: process.env.CLOUDFLARE_PROJECT_NAME || "",
