@@ -37,13 +37,11 @@ jobs:
           quiet: true
           secrets: |
             CLOUDFLARE_ACCOUNT_ID
-            CLOUDFLARE_PROJECT_NAME
             CLOUDFLARE_API_TOKEN
             OPENAI_API_KEY
             DATABASE_URL
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_PROJECT_NAME: setmindset-agent
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
